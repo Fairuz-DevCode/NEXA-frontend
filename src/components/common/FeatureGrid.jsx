@@ -1,0 +1,31 @@
+import React from 'react';
+import { FEATURED } from '../../services/productData';
+
+const FeaturedGrid = () => {
+  return (
+    <div className='w-full'>
+      <div className="flex justify-between items-center mb-4 ">
+        <h2 className="text-xl font-bold tracking-wide text-parchment-100">Featured Collections</h2>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-4">
+        {FEATURED.map((item) => (
+          <div key={item.id} className="relative rounded-2xl overflow-hidden h-80 sm:h-90 md:h-80 lg:h-100 xl:h-80 group cursor-pointer shadow-md">
+            <img
+              src={item.image}
+              alt={item.title}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3">
+              <h3 className="font-bold text-white text-sm md:text-base">{item.title}</h3>
+              <p className="text-[10px] md:text-xs text-gray-300">{item.subtitle}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  );
+};
+
+export default FeaturedGrid;

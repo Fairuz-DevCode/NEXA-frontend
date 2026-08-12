@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Font Family dari Design System */
+  --font-headline: 'Manrope', sans-serif;
+  --font-body: 'Manrope', sans-serif;
+  --font-label: 'Inter', sans-serif;
+
+  /* --- PALETTE WARNA: PARCHMENT --- */
+  --color-parchment-DEFAULT: #f6f2f0;
+  --color-parchment-100: #3d2c24;
+  --color-parchment-200: #795949;
+  --color-parchment-300: #ad8876;
+  --color-parchment-400: #d1bdb3;
+  --color-parchment-500: #f6f2f0;
+  --color-parchment-600: #f7f4f2;
+  --color-parchment-700: #f9f7f5;
+  --color-parchment-800: #fbf9f9;
+  --color-parchment-900: #fdfcfc;
+
+  /* --- PALETTE WARNA: SEASHELL --- */
+  --color-seashell-DEFAULT: #f3e7e4;
+  --color-seashell-100: #41241d;
+  --color-seashell-200: #81483a;
+  --color-seashell-300: #b87361;
+  --color-seashell-400: #d5aca2;
+  --color-seashell-500: #f3e7e4;
+  --color-seashell-600: #f5ebe8;
+  --color-seashell-700: #f7f0ee;
+  --color-seashell-800: #faf5f4;
+  --color-seashell-900: #fcfaf9;
+
+  /* --- PALETTE WARNA: ALMOND SILK --- */
+  --color-almond_silk-DEFAULT: #e7d1c9;
+  --color-almond_silk-100: #3c241b;
+  --color-almond_silk-200: #784736;
+  --color-almond_silk-300: #b26c53;
+  --color-almond_silk-400: #cc9f8e;
+  --color-almond_silk-500: #e7d1c9;
+  --color-almond_silk-600: #ecdbd5;
+  --color-almond_silk-700: #f1e4df;
+  --color-almond_silk-800: #f6edea;
+  --color-almond_silk-900: #faf6f4;
+
+  /* --- PALETTE WARNA: LINEN --- */
+  --color-linen-DEFAULT: #f1e7dd;
+  --color-linen-100: #422e1b;
+  --color-linen-200: #845d36;
+  --color-linen-300: #bc8b5b;
+  --color-linen-400: #d7ba9d;
+  --color-linen-500: #f1e7dd;
+  --color-linen-600: #f4ede5;
+  --color-linen-700: #f7f1eb;
+  --color-linen-800: #faf6f2;
+  --color-linen-900: #fcfaf8;
+
+  /* --- PALETTE WARNA: DESERT SAND --- */
+  --color-desert_sand-DEFAULT: #d0b49f;
+  --color-desert_sand-100: #312318;
+  --color-desert_sand-200: #624630;
+  --color-desert_sand-300: #946949;
+  --color-desert_sand-400: #b88e6e;
+  --color-desert_sand-500: #d0b49f;
+  --color-desert_sand-600: #d9c3b2;
+  --color-desert_sand-700: #e3d2c6;
+  --color-desert_sand-800: #ece1d9;
+  --color-desert_sand-900: #f6f0ec;
+}
+
+
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: var(--font-body);
+  }
+}
+
+@layer utilities {
+  /* Shortcut andalan biar gak capek ngetik berulang-ulang */
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  
+  .flex-between {
+    @apply flex items-center justify-between;
+  }
+
+}
