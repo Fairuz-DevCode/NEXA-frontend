@@ -19,14 +19,15 @@ const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = userStae('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
   } = useForm({
-    defaultValues: { name: '', email: '', password: '' }
+    defaultValues: { name: '', email: '', password: '' },
+    mode: 'onChange'
   });
 
   const from = location.state?.from?.pathname || null;

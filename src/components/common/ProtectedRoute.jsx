@@ -20,8 +20,12 @@ const ProtectedRoute = ({
   allowedRoles = [],
   redirectPath = '/login',
 }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return <div>Loading ...</div>;
+  }
 
   // Belum login (guest) → redirect ke login
   if (!currentUser) {
@@ -29,8 +33,9 @@ const ProtectedRoute = ({
   }
 
   // Sudah login tapi role tidak sesuai → redirect ke halaman utama role-nya
-  if (allowedRoles.length > 0 && !allowedRoles.includes(currentUser.role)) {
-    const fallback = currentUser.role === 'admin' ? '/admin/dashboard' : '/';
+  const userRole = currentUser.role || 'user';
+  if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+    const fallback = userRole === 'admin' ? '/admin/dashboard' : '/';
     return <Navigate to={fallback} replace />;
   }
 

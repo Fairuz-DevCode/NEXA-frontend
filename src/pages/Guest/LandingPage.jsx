@@ -2,11 +2,89 @@ import React from 'react';
 import img1 from '../../assets/img/img1.png';
 import { Truck, RotateCcw, Headset, LockKeyhole } from 'lucide-react';
 
-import ProductCatalog from './ProductCatalog';
 import CategorySection from '../../components/common/CategorySection';
 import FeaturedGrid from '../../components/common/FeatureGrid';
 import PromoBanner from '../../components/common/PromoBanner';
+import ProductCard from '../../components/common/ProductCard';
 
+
+const mockProducts = [
+  {
+    id: 'm1',
+    name: 'Nike Air Force 1 07',
+    sub: "Men's shoes",
+    price: 1650000,
+    oldPrice: 1830000,
+    rating: 4.9,
+    gender: 'Man',
+    brand: 'Nike',
+    category: 'Sneakers',
+    color: 'White',
+    material: 'Real Skin',
+    sole: 'Rubber Sole',
+    image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'm2',
+    name: 'Nike Court Low Vintage',
+    sub: "Men's shoes",
+    price: 1725000,
+    oldPrice: 1900000,
+    rating: 4.9,
+    gender: 'Man',
+    brand: 'Nike',
+    category: 'Casual Shoes',
+    color: 'White',
+    material: 'Real Skin',
+    sole: 'Rubber Sole',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'm3',
+    name: 'Nike Air Max SC SE Maroon',
+    sub: "Men's shoes",
+    price: 1500000,
+    oldPrice: 1680000,
+    rating: 4.9,
+    gender: 'Man',
+    brand: 'Nike',
+    category: 'Sport shoes',
+    color: 'Red',
+    material: 'Mesh',
+    sole: 'EVA Sole',
+    image: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=500&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'm4',
+    name: 'Nike Air Max 1 Original',
+    sub: "Men's shoes",
+    price: 1725000,
+    oldPrice: 1860000,
+    rating: 4.9,
+    gender: 'Man',
+    brand: 'Nike',
+    category: 'Running Shoes',
+    color: 'Blue',
+    material: 'Mesh',
+    sole: 'Rubber Sole',
+    image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'm5',
+    name: 'Nike Air Max 1 Dusty Rose',
+    sub: "Women's shoes",
+    price: 1650000,
+    oldPrice: 1830000,
+    rating: 4.8,
+    gender: 'Woman',
+    brand: 'Nike',
+    category: 'Casual Shoes',
+    color: 'Red',
+    material: 'Real Skin',
+    sole: 'Rubber Sole',
+    image: 'https://images.unsplash.com/photo-1539185441755-769473a23570?w=500&auto=format&fit=crop&q=80',
+  },
+]
 
 const LandingPage = () => {
 
@@ -103,8 +181,10 @@ const LandingPage = () => {
             <CategorySection />
           </div>
           {/* Catalog Section */} 
-          <div>
-            <ProductCatalog />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {mockProducts.map((p) => (
+            <ProductCard key={p.id} product={p}/>
+            ))}
           </div>
         </div>
 

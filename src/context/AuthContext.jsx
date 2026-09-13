@@ -1,21 +1,40 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react';
-import API from '../services/api';
+import API, { setAccessToken } from '../api/api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null)
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    let isMounted = true;
+
+    const initializeAuth = async () => {
       try {
-        const response = await API.get('/users/me');
-        setCurrentUser(response.data.user);
+        const refreshRes = await API.post("/auth/refresh");
+        const token = refreshRes.data.payload.accessToken;
+
+        setAccessToken(token);
+
+        const userRes = await API.get('/users/me');
+        const user = userRes.data.payload.user || userRes.data.payload;
+
+        if (isMounted) {
+          setCurrentUser(user);
+        }
       } catch (error) {
-        setCurrentUser(null);
+        if (isMounted) {
+          setAccessToken(null);
+          setCurrentUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
-    fetchUser();
+    initializeAuth();
   }, []);
 
   // =============================================
@@ -31,9 +50,9 @@ export const AuthProvider = ({ children }) => {
   const loginUser = useCallback(async (email, password) => {
     try {
       const response = await API.post('/auth/login', { email, password });
-      const user = response.data.user;
-      setCurrentUser(user);
-      return user;
+      setAccessToken(response.data.payload.accessToken);
+      setCurrentUser(response.data.payload.user);
+      return response.data.payload.user;
     } catch (error) {
       const message = error.response?.data?.message || 'login gagal coba lagi';
       throw new Error(message);
@@ -46,9 +65,9 @@ export const AuthProvider = ({ children }) => {
   const registerUser = useCallback(async (name, email, password) => {
     try {
       const response = await API.post('/auth/register', { name, email, password });
-      const user = response.data.user
-      setCurrentUser(user);
-      return user;
+      setAccessToken(response.data.payload.accessToken);
+      setCurrentUser(response.data.payload.user);
+      return response.data.payload.user;
     } catch (error) {
       const message = error.response?.data?.message || 'Registrasi gagal.';
       throw Error(message);
@@ -64,6 +83,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('error :', error);
     }
+    setAccessToken(null);
     setCurrentUser(null);
   }, []);
 
@@ -74,9 +94,9 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = useCallback(async (updatedData) => {
     try {
       const response = await API.put("/users/me", updatedData);
-      const updateUser = response.data.user;
-      setCurrentUser(updateUser);
-      return response.data;
+      const user = response.data.payload.user || response.data.payload;
+      setCurrentUser(user);
+      return user;
     } catch (error) {
       console.error("Gagal memperbarui profil:", error);
       throw error;
@@ -91,12 +111,13 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateProfile,
         currentUser,
+        loading,
         isAdmin,
         isUser,
         isGuest
       }}
     >
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

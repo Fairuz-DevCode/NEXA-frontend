@@ -1,100 +1,85 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from 'react';
+import { getCart, addCartItem, updateCartItem, removeCartItem } from '../api/carts.js';
+import { useAuth } from '../hooks/useAuth.js';
 
-export const cartContext = createContext(); //membuat context (ruang kosong) untuk menimpan data 
+export const CartContext = createContext();
 
+export const CartProvider = ({ children }) => {
+  const { currentUser } = useAuth();
+  const [cartData, setCartData] = useState({ id: null, items: [], total_price: 0 });
+  const [cartLoading, setCartLoading] = useState(false);
 
-export const CartProvider = ({children}) => {
-  const [cartItems, setCartItems] = useState([]); //data di cartItems setCartitems alat untuk mengubahnya
+  // =============================================
+  //   FETCH CART DARI BACKEND
+  // =============================================
+  const fetchCart = useCallback(async () => {
+    if (!currentUser) {
+      setCartData({ id: null, items: [], total_price: 0 });
+      return;
+    }
+    try {
+      setCartLoading(true);
+      const data = await getCart();
+      setCartData(data || { id: null, items: [], total_price: 0 });
+    } catch {
+      setCartData({ id: null, items: [], total_price: 0 });
+    } finally {
+      setCartLoading(false);
+    }
+  }, [currentUser]);
 
-  // =======================================
-  //   fungsi menambahkan data ke cart
-  // =======================================
-  const addToCart = (product) => { //butuh product utuh 
-    setCartItems((prevItems) => {
-      const isExist = prevItems.find((item) => item.id === product.id ); // cek apa ada yang sama 
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
 
-      if(isExist){
-        return prevItems.map(
-          (item) => item.id === product.id ? {...item, quantity: item.quantity + 1} : item
-        ); // logika nya a = b ? yes : no
-      }
+  // =============================================
+  //   TAMBAH ITEM
+  // =============================================
+  const addToCart = useCallback(async (product_id, product_variant_id, quantity = 1) => {
+    await addCartItem({ product_id, product_variant_id, quantity });
+    await fetchCart();
+  }, [fetchCart]);
 
-      return [...prevItems, {...product, quantity : 1 }]; // jika nggak ada maka tambahkan ke array yang baru
-    });
-  };
+  // =============================================
+  //   UPDATE QUANTITY
+  // =============================================
+  const updateQuantity = useCallback(async (itemId, quantity) => {
+    await updateCartItem(itemId, quantity);
+    await fetchCart();
+  }, [fetchCart]);
 
-  // =======================================
-  //   fungsi mengedit quantity di cart 
-  // =======================================
+  // =============================================
+  //   HAPUS ITEM
+  // =============================================
+  const removeItem = useCallback(async (itemId) => {
+    await removeCartItem(itemId);
+    await fetchCart();
+  }, [fetchCart]);
 
-  const increaseQuantity = (productId) => { //hanya butuh id nya saja 
-    setCartItems((prevItems) => {
+  // =============================================
+  //   CLEAR CART (local reset setelah checkout)
+  // =============================================
+  const clearCart = useCallback(() => {
+    setCartData({ id: null, items: [], total_price: 0 });
+  }, []);
 
-      return prevItems.map(
-        (item) => item.id === productId ? {...item, quantity : item.quantity + 1} : item
-      );
-    });
-  };
-
-  const decreaseQuantity = (productId) => {
-    setCartItems((prevItems) => {
-      const targetItems = prevItems.find((item) => item.id === productId);
-
-      if(targetItems && targetItems.quantity > 1){
-        return prevItems.map(
-          (item) => item.id === productId? {...item, quantity : item.quantity - 1} : item
-        );
-      }
-      return prevItems;
-    });
-  };
-
-  // =======================================
-  //            total items
-  // =======================================
-  const getCartCount = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  // =======================================
-  //            total items price
-  // =======================================
-  const getPriceCount = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
-
-  // =======================================
-  //          delete item tetentu
-  // =======================================
-  const removeFromCart = (productId) => {
-    setCartItems((prevItems) => {
-      return prevItems.filter((item) => item.id !== productId);
-    });
-  };
-
-  // =======================================
-  //              delete all
-  // =======================================
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const getCartCount = () =>
+    cartData.items?.reduce((total, item) => total + item.quantity, 0) ?? 0;
 
   return (
-    <cartContext.Provider value= {{ 
-      cartItems, 
-      addToCart,
-      increaseQuantity,
-      decreaseQuantity,
-      getCartCount,
-      getPriceCount,
-      removeFromCart,
-      clearCart
-      }}>
+    <CartContext.Provider
+      value={{
+        cartData,
+        cartLoading,
+        fetchCart,
+        addToCart,
+        updateQuantity,
+        removeItem,
+        clearCart,
+        getCartCount,
+      }}
+    >
       {children}
-    </cartContext.Provider>
+    </CartContext.Provider>
   );
 };
-
-
-
-

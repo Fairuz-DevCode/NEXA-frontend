@@ -1,4 +1,5 @@
 import React from "react";
+import { Loader2 } from "lucide-react";
 
 export const Button = ({
   children,
@@ -6,6 +7,7 @@ export const Button = ({
   isLoading = false,
   type = "submit",
   className = '',
+  icon: Icon,
   ...props
 }) => {
   return (

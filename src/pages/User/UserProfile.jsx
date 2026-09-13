@@ -1,34 +1,51 @@
-import React, { useContext, useState } from 'react';
-import { User, Phone, Mail, Save, CheckCircle2, ShieldCheck, MapPin, Loader2, KeyRound } from 'lucide-react';
+import React, { useContext, useState, useEffect } from 'react';
+import { User, ShieldCheck, MapPin, Save, CheckCircle2, Loader2, KeyRound, Plus, Trash2 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
+import { getAddresses, createAddress, deleteAddress } from '../../api/address';
+import { updateUserProfile, changePassword } from '../../api/admin';
+import Modal from '../../components/ui/Modal';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
 const UserProfile = () => {
-  const { currentUser } = useContext(AuthContext);
-
-  // Menggunakan state hanya untuk memindah antar tab, sisanya tetap UI statis
-  const [activeTab, setActiveTab] = useState('profile'); 
-  const isSaved = false;
-  const isSubmitting = false;
-  const formData = {
-    name: currentUser?.name || 'Nama Lengkap',
-    email: currentUser?.email || 'email@example.com',
-    phone: currentUser?.phone || '08xxxxxxxx'
-  };
+  const {
+    currentUser,
+    activeTab,
+    setActiveTab,
+    profileForm,
+    setProfileForm,
+    profileSaving,
+    profileSuccess,
+    handleSaveProfile,
+    passwordForm,
+    setPasswordForm,
+    passwordSaving,
+    passwordSuccess,
+    handleChangePassword,
+    addresses,
+    loadingAddresses,
+    isAddModalOpen,
+    setIsAddModalOpen,
+    newAddr,
+    setNewAddr,
+    handleAddAddress,
+    handleDeleteAddress,
+  } = useUserProfile();
 
   return (
-    <div className="p-8 font-body text-parchment-100 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold tracking-wide mb-6">Pengaturan Akun</h1>
+    <div className="p-4 sm:p-8 font-body max-w-5xl mx-auto">
+      <h1 className="text-2xl font-extrabold font-headline tracking-wide mb-6 text-gray-900">
+        Pengaturan Akun
+      </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Sidebar Navigasi Tab */}
         <div className="space-y-1">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'profile'
-                ? 'bg-parchment-100 text-black font-semibold'
-                : 'text-parchment-100/70 hover:bg-white/5'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-label font-bold transition ${activeTab === 'profile'
+                ? 'bg-black text-white shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
             <User size={16} />
             <span>Profil Saya</span>
@@ -36,11 +53,10 @@ const UserProfile = () => {
 
           <button
             onClick={() => setActiveTab('security')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'security'
-                ? 'bg-parchment-100 text-black font-semibold'
-                : 'text-parchment-100/70 hover:bg-white/5'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-label font-bold transition ${activeTab === 'security'
+                ? 'bg-black text-white shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
             <ShieldCheck size={16} />
             <span>Keamanan Akun</span>
@@ -48,11 +64,10 @@ const UserProfile = () => {
 
           <button
             onClick={() => setActiveTab('address')}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium transition ${
-              activeTab === 'address'
-                ? 'bg-parchment-100 text-black font-semibold'
-                : 'text-parchment-100/70 hover:bg-white/5'
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-label font-bold transition ${activeTab === 'address'
+                ? 'bg-black text-white shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
             <MapPin size={16} />
             <span>Daftar Alamat</span>
@@ -60,58 +75,57 @@ const UserProfile = () => {
         </div>
 
         {/* Area Konten Tab */}
-        <div className="md:col-span-3 bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
-          
+        <div className="md:col-span-3 bg-white border border-gray-200 rounded-2xl p-6 shadow-xs">
           {/* TAB 1: PROFIL */}
           {activeTab === 'profile' && (
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-              <h2 className="text-sm font-semibold border-b border-white/10 pb-3 mb-4">
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              <h2 className="text-base font-bold font-headline border-b border-gray-100 pb-3 mb-4 text-gray-900">
                 Informasi Pribadi
               </h2>
 
-              {isSaved && (
-                <div className="flex items-center gap-2 p-3 bg-emerald-500/20 text-emerald-300 rounded-lg text-xs">
+              {profileSuccess && (
+                <div className="flex items-center gap-2 p-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs">
                   <CheckCircle2 size={16} />
                   <span>Profil berhasil diperbarui!</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs mb-1 opacity-80">Nama Lengkap</label>
+                <label className="block text-xs font-label font-bold text-gray-700 mb-1">Nama Lengkap</label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={() => {}}
-                  className="w-full p-2.5 bg-black/20 border border-white/15 rounded-lg text-xs"
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs mb-1 opacity-80">Email</label>
+                <label className="block text-xs font-label font-bold text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
-                  value={formData.email}
+                  value={currentUser?.email || ''}
                   disabled
-                  className="w-full p-2.5 bg-black/40 border border-white/5 rounded-lg text-xs opacity-50 cursor-not-allowed"
+                  className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-xs mb-1 opacity-80">Nomor Telepon</label>
+                <label className="block text-xs font-label font-bold text-gray-700 mb-1">Nomor Telepon</label>
                 <input
                   type="tel"
-                  value={formData.phone}
-                  onChange={() => {}}
-                  className="w-full p-2.5 bg-black/20 border border-white/15 rounded-lg text-xs"
+                  value={profileForm.phone}
+                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-2.5 bg-parchment-100 text-black font-semibold rounded-lg text-xs flex justify-center items-center gap-2 mt-4"
+                disabled={profileSaving}
+                className="w-full py-3 bg-black text-white font-label font-bold rounded-xl text-xs flex justify-center items-center gap-2 hover:bg-gray-800 transition-all mt-4 shadow-sm"
               >
-                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {profileSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 <span>Simpan Profil</span>
               </button>
             </form>
@@ -119,58 +133,176 @@ const UserProfile = () => {
 
           {/* TAB 2: KEAMANAN (UBAH PASSWORD) */}
           {activeTab === 'security' && (
-            <div className="space-y-4">
-              <h2 className="text-sm font-semibold border-b border-white/10 pb-3 mb-4">
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <h2 className="text-base font-bold font-headline border-b border-gray-100 pb-3 mb-4 text-gray-900">
                 Ubah Password
               </h2>
+
+              {passwordSuccess && (
+                <div className="flex items-center gap-2 p-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs">
+                  <CheckCircle2 size={16} />
+                  <span>Password berhasil diperbarui!</span>
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs mb-1 opacity-80">Password Lama</label>
+                <label className="block text-xs font-label font-bold text-gray-700 mb-1">Password Lama</label>
                 <input
                   type="password"
+                  required
                   placeholder="••••••••"
-                  className="w-full p-2.5 bg-black/20 border border-white/15 rounded-lg text-xs"
+                  value={passwordForm.oldPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
                 />
               </div>
+
               <div>
-                <label className="block text-xs mb-1 opacity-80">Password Baru</label>
+                <label className="block text-xs font-label font-bold text-gray-700 mb-1">Password Baru</label>
                 <input
                   type="password"
+                  required
                   placeholder="••••••••"
-                  className="w-full p-2.5 bg-black/20 border border-white/15 rounded-lg text-xs"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
                 />
               </div>
-              <button className="w-full py-2.5 bg-parchment-100 text-black font-semibold rounded-lg text-xs flex justify-center items-center gap-2 mt-4">
-                <KeyRound size={16} />
+
+              <button
+                type="submit"
+                disabled={passwordSaving}
+                className="w-full py-3 bg-black text-white font-label font-bold rounded-xl text-xs flex justify-center items-center gap-2 hover:bg-gray-800 transition-all mt-4 shadow-sm"
+              >
+                {passwordSaving ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />}
                 <span>Update Password</span>
               </button>
-            </div>
+            </form>
           )}
 
           {/* TAB 3: ALAMAT PENGIRIMAN */}
           {activeTab === 'address' && (
             <div>
-              <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                <h2 className="text-sm font-semibold">Alamat Pengiriman</h2>
-                <button className="px-3 py-1.5 bg-parchment-100 text-black rounded-lg text-xs font-semibold">
-                  + Tambah Alamat
+              <div className="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
+                <h2 className="text-base font-bold font-headline text-gray-900">Alamat Pengiriman</h2>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="px-3.5 py-2 bg-black text-white rounded-xl text-xs font-label font-bold flex items-center gap-1 hover:bg-gray-800 transition-colors"
+                >
+                  <Plus size={14} /> Tambah Alamat
                 </button>
               </div>
 
-              {/* Contoh Tampilan Kartu Alamat */}
-              <div className="p-4 bg-black/20 border border-white/10 rounded-lg space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-xs">{formData.name}</span>
-                  <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-parchment-100/70">Utama</span>
+              {loadingAddresses ? (
+                <div className="py-8 text-center text-gray-500 text-xs font-label">Memuat daftar alamat...</div>
+              ) : addresses.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 text-xs font-label">
+                  Belum ada alamat pengiriman tersimpan.
                 </div>
-                <p className="text-xs opacity-70">{formData.phone}</p>
-                <p className="text-xs opacity-70">Jl. Raya Wonokromo No. 123, Surabaya, Jawa Timur, 60243</p>
-              </div>
+              ) : (
+                <div className="space-y-3">
+                  {addresses.map((addr) => (
+                    <div
+                      key={addr.id}
+                      className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-xs uppercase bg-gray-200 px-2 py-0.5 rounded-md text-gray-800">
+                            {addr.label}
+                          </span>
+                          <span className="text-xs font-bold text-gray-900">{addr.phone}</span>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {addr.street_address}, {addr.city}, {addr.postal_code} ({addr.country})
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteAddress(addr.id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Hapus Alamat"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-
         </div>
       </div>
+
+      {/* Modal Add Address */}
+      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Tambah Alamat Baru">
+        <form onSubmit={handleAddAddress} className="space-y-4">
+          <div>
+            <label className="block text-xs font-label font-bold text-gray-700 mb-1">Label Alamat</label>
+            <input
+              type="text"
+              required
+              placeholder="Rumah / Kantor"
+              value={newAddr.label}
+              onChange={(e) => setNewAddr({ ...newAddr, label: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-label font-bold text-gray-700 mb-1">Nomor Telepon</label>
+            <input
+              type="text"
+              required
+              placeholder="08123456789"
+              value={newAddr.phone}
+              onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-label font-bold text-gray-700 mb-1">Alamat Lengkap</label>
+            <textarea
+              required
+              rows={2}
+              placeholder="Nama Jalan, RT/RW, No. Rumah"
+              value={newAddr.street_address}
+              onChange={(e) => setNewAddr({ ...newAddr, street_address: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-label font-bold text-gray-700 mb-1">Kota</label>
+              <input
+                type="text"
+                required
+                placeholder="Surabaya"
+                value={newAddr.city}
+                onChange={(e) => setNewAddr({ ...newAddr, city: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-label font-bold text-gray-700 mb-1">Kode Pos</label>
+              <input
+                type="text"
+                required
+                placeholder="60243"
+                value={newAddr.postal_code}
+                onChange={(e) => setNewAddr({ ...newAddr, postal_code: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-1 focus:ring-black outline-none"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2.5 bg-black text-white font-label font-bold rounded-xl text-sm hover:bg-gray-800 transition-colors mt-2"
+          >
+            Simpan Alamat
+          </button>
+        </form>
+      </Modal>
     </div>
   );
-}
+};
+
 export default UserProfile;

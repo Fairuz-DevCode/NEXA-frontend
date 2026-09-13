@@ -1,5 +1,35 @@
 import React from 'react';
-import { FEATURED } from '../../services/productData';
+import featureRunning from "../../assets/img/feature-running.jpg";
+import featureLifestyle from "../../assets/img/feature-lifestyle.jpg";
+import featureTraining from "../../assets/img/feature-training.jpg";
+import featureBasket from "../../assets/img/feature-basket.jpg";
+
+const FEATURED = [
+  {
+    id: 1,
+    title: "Running",
+    subtitle: "Built for speed",
+    image: featureRunning,
+  },
+  {
+    id: 2,
+    title: "Lifestyle",
+    subtitle: "Made for everyday",
+    image: featureLifestyle,
+  },
+  {
+    id: 3,
+    title: "Training",
+    subtitle: "Push your limits",
+    image: featureTraining,
+  },
+  {
+    id: 4,
+    title: "Basketball",
+    subtitle: "Own the game",
+    image: featureBasket,
+  },
+];
 
 const FeaturedGrid = () => {
   return (

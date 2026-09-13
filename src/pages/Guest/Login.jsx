@@ -18,7 +18,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = userState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const {
     register,
@@ -29,7 +29,8 @@ const Login = () => {
     defaultValues: {
       email: '',
       password: ''
-    }
+    },
+    mode: 'onChange'
   });
 
   // Halaman asal sebelum redirect ke login (untuk redirect balik setelah login)
@@ -67,7 +68,7 @@ const Login = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
             {/* Email Field */}
-            <EmailInput register={register} error={errors.email} />
+            <EmailInput register={register} error={errors.email} isLogin={true} />
 
 
             {/* Password Field */}
@@ -76,6 +77,7 @@ const Login = () => {
               error={errors.password}
               showPassword={showPassword}
               setShowPassword={setShowPassword}
+              isLogin={true}
             />
 
             {/* Error dari API Backend */}

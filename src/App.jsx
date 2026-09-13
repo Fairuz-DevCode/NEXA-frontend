@@ -23,7 +23,7 @@ import UserProfile from './pages/User/UserProfile';
 import Dashboard from './pages/Admin/Dashboard';
 import ManageOrders from './pages/Admin/ManageOrders';
 import ManageProduct from './pages/Admin/ManageProduct';
-import ManageUsers from './pages/Admin/ManageUsers';
+import ManageDiscount from './pages/Admin/ManageDiscount';
 
 const App = () => {
   return (
@@ -40,6 +40,7 @@ const App = () => {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/product" element={<ProductCatalog />} />
               <Route path="/product/:id" element={<ProductDetail />} />
 
               {/* ======================== */}
@@ -48,7 +49,7 @@ const App = () => {
               <Route
                 path="/cart"
                 element={
-                  <ProtectedRoute allowedRoles={['user', 'admin']}>
+                  <ProtectedRoute>
                     <Cart />
                   </ProtectedRoute>
                 }
@@ -56,7 +57,7 @@ const App = () => {
               <Route
                 path="/checkout"
                 element={
-                  <ProtectedRoute allowedRoles={['user', 'admin']}>
+                  <ProtectedRoute allowedRoles={['user']}>
                     <Checkout />
                   </ProtectedRoute>
                 }
@@ -72,7 +73,7 @@ const App = () => {
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['user', 'admin']}>
                     <UserProfile />
                   </ProtectedRoute>
                 }
@@ -106,10 +107,10 @@ const App = () => {
                 }
               />
               <Route
-                path="/admin/users"
+                path="/admin/discount"
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <ManageUsers />
+                    <ManageDiscount />
                   </ProtectedRoute>
                 }
               />

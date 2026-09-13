@@ -1,8 +1,15 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Send } from 'lucide-react';
 import { InstagramIcon, FacebookIcon, TwitterIcon, YoutubeIcon } from '../../assets/icons/SocialIcons';
 
 const Footer = () => {
+  const location = useLocation();
+
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <footer className="bg-[#111111] text-gray-300 py-16 w-full mt-auto border-t border-gray-900">
       <div className="mx-5 px-5 md:px-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:px-15 xl:px-30">

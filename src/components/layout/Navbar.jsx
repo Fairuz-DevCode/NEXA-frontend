@@ -25,8 +25,84 @@ const Navbar = () => {
         </Link>
       </div>
 
+      <div className="hidden md:flex justify-between items-center gap-1 max-w-2xl h-10 mt-2 p-1.5">
+        {currentUser?.role === 'admin' ? (
+          <>
+            <Link
+              to='/admin/dashboard'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center px-3 py-2 text-xs lg:text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800 transition-colors whitespace-nowrap'
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              to='/admin/products'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center px-3 py-2 text-xs lg:text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800 transition-colors whitespace-nowrap'
+            >
+              Manage Produk
+            </Link>
+
+            <Link
+              to='/admin/orders'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center px-3 py-2 text-xs lg:text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800 transition-colors whitespace-nowrap'
+            >
+              Manage Pesanan
+            </Link>
+
+            <Link
+              to='/admin/discount'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center px-3 py-2 text-xs lg:text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800 transition-colors whitespace-nowrap'
+            >
+              Manage Discount
+            </Link>
+          </>
+        ) : (
+          <>
+            {/* --- GRP Kategori --- */}
+            <Link
+              to='/product?category=Sneakers & Kasual'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800'
+            > Sneakers & Kasual
+            </Link>
+
+            <Link
+              to='/product?category=Formal & Dress Shoes'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800'
+            > Formal & Dress Shoes
+            </Link>
+
+            <Link
+              to='/product?category=Boots'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center w-full  px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800'
+            > Boots
+            </Link>
+
+            <Link
+              to='/product?category=Heels & Flats'
+              onClick={() => setIsMenuOpen(false)}
+              className='justify-center items-center w-full flex  px-3 py-2 text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800'
+            > Heels & Flats
+            </Link>
+
+            <Link
+              to='/product?category=Athletic'
+              onClick={() => setIsMenuOpen(false)}
+              className='flex justify-center items-center w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-300/80 hover:text-linen-800'
+            > Athletic
+            </Link>
+          </>
+        )}
+      </div>
+
       {/* Right-Navbar */}
-      <div className="flex items-center gap-3 lg:pr-10 xl:pr-30">
+      <div className="flex items-center gap-3 lg:pr-10 xl:pr-30 relative z-10">
         {/* Search Bar Melar Kecil */}
         <div className="relative flex items-center">
           <input
@@ -48,91 +124,151 @@ const Navbar = () => {
           {currentUser && (
             <Link
               to="/profile"
-              className="flex items-center gap-2 px-3 py-1.5 bg-linen-700/40 rounded-full mr-1"
+              className="flex items-center gap-2 px-3 py-1.5 bg-linen-700/40 hover:bg-linen-700/80 cursor-pointer rounded-full mr-1 transition-colors"
             >
               <User className="w-4 h-4 text-parchment-100" />
               <span className="text-xs font-bold text-parchment-100 hidden md:block truncate max-w-100">
-                {currentUser.username}
+                {currentUser.name || currentUser.username || currentUser.email}
               </span>
             </Link>
           )}
 
-          <button className="flex items-center justify-center cursor-pointer p-2 relative hover:bg-linen-700/40 rounded-full transition-colors">
+          <Link 
+            to="/cart" 
+            className="flex items-center justify-center cursor-pointer p-2 relative hover:bg-linen-700/40 rounded-full transition-colors"
+          >
             <ShoppingBag className='text-parchment-100 w-4 h-4' />
-
-            {/* BADGE ANGKA: Muncul otomatis jika jumlah barang di atas 0 */}
             {getCartCount() > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-desert_sand-400 text-linen-100 text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-sm animate-pulse">
                 {getCartCount()}
               </span>
             )}
-          </button>
+          </Link>
+
+          {currentUser ? (
+            <button
+              onClick={() => {
+                logout();
+                setIsMenuOpen(false);
+              }}
+              className='px-3 py-2 text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80 cursor-pointer'
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to='/login'
+              onClick={() => setIsMenuOpen(false)}
+              className='px-3 py-2 text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+            > Login
+            </Link>
+          )}
 
 
           <div className="relative">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} // not !false
-              className="flex items-center justify-center cursor-pointer p-2 hover:bg-linen-700/40 rounded-full transition-colors"
+              className="md:hidden flex items-center justify-center cursor-pointer p-2 hover:bg-linen-700/40 rounded-full transition-colors"
             > <Menu className='text-parchment-100 w-4 h-4' />
             </button>
 
             {isMenuOpen && (
-              <div className="absolute right-0 z-50 w-32 h-70 mt-2 p-1.5 rounded-xl shadow-lg bg-linen-800 border border-linen-700/40 ">
+              <div className="md:hidden absolute right-0 z-50 w-48 mt-2 p-2 rounded-xl shadow-lg bg-linen-800 border border-linen-700/40 space-y-1">
 
-                {/* --- GRP Kategori --- */}
-                <Link
-                  to='/catalog?category=man'
-                  onClick={() => setIsMenuOpen(false)}
-                  className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
-                > Man
-                </Link>
+                {currentUser?.role === 'admin' ? (
+                  <>
+                    <Link
+                      to='/admin/dashboard'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    >
+                      Dashboard
+                    </Link>
 
-                <Link
-                  to='/catalog?category=girl'
-                  onClick={() => setIsMenuOpen(false)}
-                  className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
-                > Girl
-                </Link>
+                    <Link
+                      to='/admin/products'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    >
+                      Manage Produk
+                    </Link>
 
-                <Link
-                  to='/catalog?category=kids'
-                  onClick={() => setIsMenuOpen(false)}
-                  className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
-                > Kids
-                </Link>
+                    <Link
+                      to='/admin/orders'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    >
+                      Manage Pesanan
+                    </Link>
 
-                <Link
-                  to='/catalog?category=brand'
-                  onClick={() => setIsMenuOpen(false)}
-                  className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
-                > Brands
-                </Link>
+                    <Link
+                      to='/admin/discount'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    >
+                      Manage Discount
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    {/* --- GRP Kategori --- */}
+                    <Link
+                      to='/product?category=Sneakers & Kasual'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    > Sneakers & Kasual
+                    </Link>
 
-                <Link
-                  to='/catalog?category=sale'
-                  onClick={() => setIsMenuOpen(false)}
-                  className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
-                > Sale
-                </Link>
+                    <Link
+                      to='/product?category=Formal & Dress Shoes'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    > Formal & Dress Shoes
+                    </Link>
 
-                <Link
-                  to='/catalog?category=newArrivals'
-                  onClick={() => setIsMenuOpen(false)}
-                  className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
-                > New Arrivals
-                </Link>
+                    <Link
+                      to='/product?category=Boots'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    > Boots
+                    </Link>
+
+                    <Link
+                      to='/product?category=Heels & Flats'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    > Heels & Flats
+                    </Link>
+
+                    <Link
+                      to='/product?category=Athletic'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    > Athletic
+                    </Link>
+                  </>
+                )}
 
                 <hr className='my-1.5 border-linen-200' />
 
                 {currentUser ? (
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsMenuOpen(false);
-                    }}
-                    className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
-                  >
-                    Logout
-                  </button>
+                  <>
+                    <Link
+                      to='/profile'
+                      onClick={() => setIsMenuOpen(false)}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    >
+                      Profil Saya
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                      }}
+                      className='block w-full px-3 py-2 text-left text-sm font-bold rounded-lg text-parchment-100 hover:bg-linen-700/80'
+                    >
+                      Logout
+                    </button>
+                  </>
                 ) : (
                   <Link
                     to='/login'
