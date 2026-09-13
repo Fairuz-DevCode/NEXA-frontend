@@ -204,7 +204,7 @@ const Dashboard = () => {
               {card.subtext}
             </p>
 
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-gray-100/60 to-transparent rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-bl from-gray-100/60 to-transparent rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
           </div>
         ))}
       </div>

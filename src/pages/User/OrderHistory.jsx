@@ -147,7 +147,7 @@ const OrderHistory = () => {
               <div className="space-y-3 mb-4">
                 {items.slice(0, 2).map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
+                    <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden shrink-0">
                       <img
                         src={getImageUrl(item.img_url || item.product_img_url || item.Product?.img_url || item)}
                         alt=""

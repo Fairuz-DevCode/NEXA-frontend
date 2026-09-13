@@ -146,7 +146,7 @@ const ProductDetail = () => {
           <div className="lg:col-span-6 space-y-4">
             
             {/* Main Hero Image Container */}
-            <div className="w-full h-[400px] sm:h-[460px] rounded-3xl bg-[#F3F4F6] border border-gray-100 overflow-hidden flex items-center justify-center p-6 relative shadow-sm">
+            <div className="w-full h-100 sm:h-115 rounded-3xl bg-[#F3F4F6] border border-gray-100 overflow-hidden flex items-center justify-center p-6 relative shadow-sm">
               <img
                 src={selectedImage}
                 alt={product.name}
