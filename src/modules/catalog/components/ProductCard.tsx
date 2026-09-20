@@ -1,123 +1,198 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Maximize2, ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '../../cart';
 import { getImageUrl } from '../../../shared/utils/imageUrl';
 import { Product } from '../../../types';
 
 interface ProductCardProps {
   product: Product;
+  dealEndsAt?: Date;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+/* ──────────────────────────────────────────────────────────
+  Countdown hook
+────────────────────────────────────────────────────────── */
+function useCountdown(target?: Date) {
+  const calc = () => {
+    if (!target) return null;
+    const diff = target.getTime() - Date.now();
+    if (diff <= 0) return { d: 0, h: 0, m: 0, s: 0 };
+    const d = Math.floor(diff / 86_400_000);
+    const h = Math.floor((diff % 86_400_000) / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    const s = Math.floor((diff % 60_000) / 1_000);
+    return { d, h, m, s };
+  };
+
+  const [time, setTime] = useState(calc);
+  useEffect(() => {
+    if (!target) return;
+    const id = setInterval(() => setTime(calc()), 1000);
+    return () => clearInterval(id);
+  }, [target]);
+  return time;
+}
+
+/* ──────────────────────────────────────────────────────────
+  Helper: two-digit pad
+────────────────────────────────────────────────────────── */
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/* ──────────────────────────────────────────────────────────
+  ProductCard
+────────────────────────────────────────────────────────── */
+export const ProductCard: React.FC<ProductCardProps> = ({ product, dealEndsAt }) => {
   const { addToCart } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
+  const countdown = useCountdown(dealEndsAt);
 
-  const displayPrice = product.price
-    ? Number(product.price).toLocaleString('id-ID')
-    : '0';
+  /* price */
+  const price = product.price ? Number(product.price) : 0;
+  const displayPrice = price.toLocaleString('id-ID');
 
-  const primaryImage = getImageUrl(product.img_url || (product as any).image_url || product.image || product);
+  /* original price: 2× current (mock) – replace with real field if available */
+  const originalPrice = ((product as any).original_price ?? price * 2).toLocaleString('id-ID');
 
+  /* discount percent */
+  const discountPct =
+    (product as any).discount ??
+    (price > 0 ? Math.round((1 - price / ((product as any).original_price ?? price * 2)) * 100) : 0);
+
+  /* image */
+  const primaryImage = getImageUrl(
+    product.img_url || (product as any).image_url || product.image || product
+  );
+
+  /* rating */
+  const rating: number = (product as any).rating ?? 4.8;
+
+  /* route */
   const productPath = (product as any).slug
     ? `/product/${(product as any).Category?.slug ? `${(product as any).Category.slug}/` : ''}${(product as any).slug}`
     : `/product/${product.id}`;
 
-  const handleBuyNow = (e: React.MouseEvent) => {
+  const handleAddCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const variants = (product as any).variants || (product as any).Variants || [];
-    const firstVariantId = variants[0]?.id;
-    addToCart(product.id, firstVariantId, 1);
+    addToCart(product.id, variants[0]?.id, 1);
   };
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    setIsFavorite((f) => !f);
   };
 
-  const brandName = product.brand || (product as any).Brand?.name || 'Nike';
-  const tagLabel = (product as any).tag || 'Best Seller';
-
   return (
-    <div className="group relative flex flex-col justify-between w-full p-4 sm:p-5 rounded-3xl bg-white shadow-md shadow-gray-200/50 border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-      {/* Top Image Container */}
-      <div className="relative w-full h-52 sm:h-56 mb-4 flex items-center justify-center p-1 overflow-hidden">
-        {/* Brand Logo Pill Top-Left */}
-        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md rounded-full px-3 py-1.5 shadow-xs flex items-center justify-center border border-gray-100">
-          {brandName.toLowerCase() === 'nike' ? (
-            <svg className="w-6 h-3 text-black fill-current" viewBox="0 0 24 24">
-              <path d="M21.71 5.3a.5.5 0 0 0-.64-.06L4.7 17.15a.5.5 0 0 1-.7-.16l-1.84-3.13a.5.5 0 0 0-.8-.08l-.22.25a.5.5 0 0 0 .04.68l3.66 3.66a.5.5 0 0 0 .73 0l16.14-12.8a.5.5 0 0 0-.2-.27z" />
-            </svg>
-          ) : (
-            <span className="text-[10px] font-extrabold font-label tracking-wider uppercase text-gray-900">
-              {brandName}
-            </span>
-          )}
+    <div className="group relative flex flex-col w-full font-body select-none">
+      {/* ── IMAGE AREA ── */}
+      <div className="relative rounded-2xl bg-[#f0f0ee] overflow-hidden">
+        {/* Discount badge */}
+        {discountPct > 0 && (
+          <span className="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm">
+            {discountPct}% Off
+          </span>
+        )}
+
+        {/* Action buttons – right column */}
+        <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+          {/* Wishlist */}
+          <button
+            onClick={toggleFavorite}
+            className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+            title="Wishlist"
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors ${
+                isFavorite ? 'fill-rose-500 text-rose-500' : 'text-gray-400'
+              }`}
+            />
+          </button>
+
+          {/* Expand / Quick View */}
+          <Link
+            to={productPath}
+            className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-110 transition-transform"
+            title="Lihat Detail"
+          >
+            <Maximize2 className="w-3.5 h-3.5 text-gray-500" />
+          </Link>
+
+          {/* Add to cart */}
+          <button
+            onClick={handleAddCart}
+            className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+            title="Tambah ke Keranjang"
+          >
+            <ShoppingCart className="w-3.5 h-3.5 text-gray-500" />
+          </button>
         </div>
 
         {/* Product Image */}
-        <Link to={productPath} className="w-full h-full flex items-center justify-center">
+        <Link to={productPath} className="block">
           <img
             src={primaryImage}
             alt={product.name}
             onError={(e: any) => {
               e.target.onerror = null;
-              e.target.src = 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80';
+              e.target.src =
+                'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80';
             }}
-            className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-56 sm:h-64 object-cover rounded-3xl p-4 group-hover:scale-105 transition-transform duration-500"
           />
         </Link>
 
-        {/* Bottom Carousel Dots */}
-        <div className="absolute bottom-3 flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-200" />
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-200" />
-        </div>
+        {/* Countdown timer (only when dealEndsAt is provided) */}
+        {countdown && (
+          <div className="absolute bottom-0 left-0 right-0 bg-[#c8a84b] rounded-b-2xl px-3 py-2.5 flex items-center justify-center gap-2">
+            {[
+              { val: countdown.d, label: 'Days' },
+              { val: countdown.h, label: 'Hours' },
+              { val: countdown.m, label: 'Mins' },
+              { val: countdown.s, label: 'Sec' },
+            ].map((unit, i) => (
+              <React.Fragment key={unit.label}>
+                {i > 0 && <span className="text-white/60 font-bold text-lg leading-none -mt-2">:</span>}
+                <div className="flex flex-col items-center min-w-8.5">
+                  <span className="text-white font-black text-lg leading-none tabular-nums">
+                    {pad(unit.val)}
+                  </span>
+                  <span className="text-white/70 text-[9px] font-semibold mt-0.5 tracking-wide">
+                    {unit.label}
+                  </span>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Card Info Body */}
-      <div className="flex-1 flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="px-3 py-1 rounded-full text-[11px] font-bold font-label bg-emerald-50 text-emerald-700 border border-emerald-100">
-            {tagLabel}
+      {/* ── INFO AREA ── */}
+      <div className="mt-3 px-0.5">
+        {/* Brand + Rating row */}
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-xs text-gray-500 font-medium">
+            {product.brand || (product as any).Brand?.name || 'NEXA'}
           </span>
-          <button
-            onClick={toggleFavorite}
-            className="p-1 text-gray-400 hover:scale-110 transition-transform cursor-pointer"
-            title="Tambah ke Favorit"
-          >
-            <Heart
-              className={`w-5 h-5 transition-colors ${
-                isFavorite ? 'fill-red-500 text-red-500' : 'text-red-500 fill-red-500'
-              }`}
-            />
-          </button>
+          <div className="flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span className="text-xs font-bold text-gray-700">{rating}</span>
+          </div>
         </div>
 
-        <Link to={productPath} className="block mt-2 mb-3">
-          <h3 className="text-sm sm:text-base font-extrabold font-headline text-gray-900 line-clamp-1 hover:text-emerald-700 transition-colors">
+        {/* Product name */}
+        <Link to={productPath}>
+          <h3 className="text-sm font-extrabold font-headline text-gray-900 line-clamp-1 hover:text-blue-600 transition-colors">
             {product.name}
           </h3>
         </Link>
 
-        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-          <div>
-            <span className="block text-[10px] text-gray-400 font-bold font-label uppercase tracking-wider">
-              Price
-            </span>
-            <span className="text-base sm:text-lg font-black font-headline text-emerald-600">
-              Rp {displayPrice}
-            </span>
-          </div>
-          <button
-            onClick={handleBuyNow}
-            className="px-5 sm:px-6 py-2.5 rounded-full bg-[#222222] hover:bg-black text-white text-xs font-extrabold font-label shadow-sm hover:shadow-md transition-all whitespace-nowrap cursor-pointer"
-          >
-            Buy Now
-          </button>
+        {/* Price row */}
+        <div className="flex items-center gap-2 mt-1.5">
+          <span className="text-base font-black text-gray-900">Rp {displayPrice}</span>
+          <span className="text-sm text-gray-400 line-through font-medium">Rp {originalPrice}</span>
         </div>
       </div>
     </div>

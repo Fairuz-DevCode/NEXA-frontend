@@ -16,7 +16,7 @@ export interface Product {
   stock?: number;
   category_id?: number | string;
   category?: string;
-  image_url?: string;
+  img_url?: string;
   image?: string;
   sub?: string;
   rating?: number;
@@ -31,7 +31,7 @@ export interface Product {
 export interface Category {
   id: number | string;
   name: string;
-  image_url?: string;
+  img_url?: string;
 }
 
 export interface CartItem {
